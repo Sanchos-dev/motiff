@@ -1,7 +1,7 @@
 # WIP Motiff
 
 Motiff is an open-source music player for linux with simple ui. 
-
+What do you wand it's just a player
 
 Motiff supports:
 - [x] local m3u/m3u8 playlists
