@@ -11,9 +11,9 @@ Motiff supports:
 - [x] .m4a
 - [x] .ogg
 - [x] .wma
-- [ ] .opus
-- [ ] .flac
+- [x] .opus
+- [x] .flac
 - [x] .wav
-- [ ] .ape
-- [ ] .aiff
+- [x] .ape
+- [x] .aiff
 
