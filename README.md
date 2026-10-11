@@ -1,20 +1,19 @@
-# WIP motiff
+# WIP Motiff
 
 Motiff is an open-source music player for linux with simple ui. 
 
 
 Motiff supports:
-
-- [ ] local m3u playlists
-- [ ] m3u playlists (streaming)
-- [ ] .mp3
-- [ ] .aac
-- [ ] .m4a
-- [ ] .ogg
-- [ ] .wma
+- [x] local m3u/m3u8 playlists
+- [ ] m3u/m3u8 playlists (streaming)
+- [x] .mp3
+- [x] .aac
+- [x] .m4a
+- [x] .ogg
+- [x] .wma
 - [ ] .opus
 - [ ] .flac
-- [ ] .waw
+- [x] .wav
 - [ ] .ape
 - [ ] .aiff
 
