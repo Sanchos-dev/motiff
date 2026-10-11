@@ -45,6 +45,10 @@ async def update_unsorted_playlist():
 			file.write(f"{i}\n")
 	return True
 
+async def update_database():
+	await update_unsorted_playlist()
+	pass
+
 async def startup():
 	username = pwd.getpwuid(os.getuid()).pw_name
 	save_config("music_path",f"/home/{username}/Music")
@@ -64,5 +68,4 @@ async def startup():
 		f.close()
 	await update_unsorted_playlist()
 	
-
 	return True

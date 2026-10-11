@@ -31,8 +31,58 @@ class UI:
 
     async def main(self, page: ft.Page):
         page.title = "Motiff"
-        page.vertical_alignment = ft.MainAxisAlignment.START
-        page.horizontal_alignment = ft.CrossAxisAlignment.START
-        
-        page.add(ft.Text("Welcome to Motiff", size=24))
+        right_panel_contents = ft.Column(
+            expand=True,
+            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
+            controls=[
+                    ft.Container(
+                    	expand=True,
+                        margin=10,
+                        padding=10,
+                        bgcolor=ft.Colors.AMBER,
+                        border_radius=10,
+                        content=ft.Text("Non clickable"),
+                    ),
+                    ft.Container(
+                    	expand=True,
+                        margin=10,
+                        padding=10,
+                        bgcolor=ft.Colors.AMBER,
+                        border_radius=10,
+                        content=ft.Text("Non clickable"),
+                    ),
+                    ft.Container(
+                    	expand=True,
+                        margin=10,
+                        padding=10,
+                        bgcolor=ft.Colors.AMBER,
+                        border_radius=10,
+                        content=ft.Text("Non clickable"),
+                    ),
+            ],
+         )
+
+        layout = ft.Row(
+            expand=True,
+            vertical_alignment=ft.CrossAxisAlignment.STRETCH,
+            controls=[
+                    ft.Container(
+                    	expand=True,
+                        margin=10,
+                        padding=10,
+                        bgcolor=ft.Colors.AMBER,
+                        border_radius=10,
+                        content=ft.Text("Non clickable"),
+                    ),
+                    ft.Container(
+                    	expand=True,
+                        margin=10,
+                        padding=10,
+                        bgcolor=ft.Colors.BLUE,
+                        border_radius=10,
+                        content=right_panel_contents,
+                    ),
+            ],
+         )
+        page.add(layout)
         page.update()
