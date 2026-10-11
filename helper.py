@@ -3,7 +3,13 @@ import time
 import asyncio
 import os
 import pwd
+import json
 from pathlib import Path
+try:
+    import mutagen
+except:
+    mutagen = None
+
 
 def save_config(inst, val):
     setattr(config, inst, val)
@@ -11,56 +17,75 @@ def save_config(inst, val):
         for k, v in vars(config).items():
             if not k.startswith("__"):
                 f.write(f"{k} = {repr(v)}\n")
+
+
 async def scan_tracks(path):
-	tracks = []
-	with os.scandir(path) as entries:
-		for entry in entries:
-			if entry.is_file():
-				filename = entry.name
-				filetype = Path(filename).suffix
-				if filetype in config.music_formats:
-					print(f"mus: A_path: {path}/{filename}")
-					tracks.append(f"{path}/{filename}")
-			elif entry.is_dir():
-				pass
-	return tracks
+    tracks = []
+    for root, _, files in os.walk(path):
+        if hasattr(config, "motiff_music_path") and config.motiff_music_path in root:
+            continue
+        for file in files:
+            filetype = Path(file).suffix.lower()
+            if filetype in config.music_formats:
+                tracks.append(os.path.join(root, file))
+    return tracks
+
 
 async def scan_playlists(path):
-	playlist = []
-	with os.scandir(path) as entries:
-		for entry in entries:
-			if entry.is_file():
-				filename = entry.name
-				filetype = Path(filename).suffix
-				if filetype in (".m3u", ".m3u8"):
-					playlist.append(f"{path}/{filename}")
-			elif entry.is_dir():
-				pass
-	return playlist
+    playlist = []
+    with os.scandir(path) as entries:
+        for entry in entries:
+            if entry.is_file():
+                filename = entry.name
+                filetype = Path(filename).suffix.lower()
+                if filetype in (".m3u", ".m3u8"):
+                    playlist.append(f"{path}/{filename}")
+    return playlist
+
 
 async def scan_for_dirs(path):
-	dirs = []
-	with os.scandir(path) as entries:
-		for entry in entries:
-			if entry.is_file():
-				pass
-			elif entry.is_dir():
-				dir_name = entry.name
-				dirs.append(dir_name)
-				pass
-	return dirs
+    dirs = []
+    with os.scandir(path) as entries:
+        for entry in entries:
+            if entry.is_dir():
+                dirs.append(entry.name)
+    return dirs
+
+
+async def parse_track_metadata(track_path):
+    title = Path(track_path).stem
+    duration = None
+    if mutagen:
+        try:
+            audio = mutagen.File(track_path)
+            if audio is not None:
+                if hasattr(audio, "info") and hasattr(audio.info, "length"):
+                    duration = int(audio.info.length)
+                if audio.tags:
+                    tag_title = audio.tags.get("TIT2") or audio.tags.get("title")
+                    if tag_title:
+                        title = str(tag_title[0] if isinstance(tag_title, list) else tag_title)
+        except Exception:
+            pass
+
+    return {
+        "path": str(track_path),
+        "title": title,
+        "duration": duration
+    }
+
 
 async def parse_m3u(file_path):
     tracklist = []
     path_obj = Path(file_path)
     if not path_obj.is_file():
         return tracklist
+
     playlist_dir = path_obj.parent
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-    except Exception as e:
-        return tracklist
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
     current_metadata = {}
     for line in lines:
         line = line.strip()
@@ -88,43 +113,87 @@ async def parse_m3u(file_path):
             track_path = Path(line)
             if not track_path.is_absolute():
                 track_path = (playlist_dir / track_path).resolve()
-            track_entry = {
-                "path": str(track_path),
-                "title": current_metadata.get("title") or track_path.stem,
-                "duration": current_metadata.get("duration")
-            }
-            tracklist.append(track_entry)
+
+            track_info = await parse_track_metadata(str(track_path))
+            if current_metadata.get("title"):
+                track_info["title"] = current_metadata["title"]
+            if current_metadata.get("duration"):
+                track_info["duration"] = current_metadata["duration"]
+
+            tracklist.append(track_info)
             current_metadata = {}
+
     return tracklist
 
+
 async def update_unsorted_playlist():
-	tr = await scan_tracks(config.music_path)
-	with open(f"{config.motiff_music_path}/Playlists/Unsorted/Unsorted.m3u", "w", encoding="utf-8") as file:
-		for i in tr:
-			file.write(f"{i}\n")
-	return True
+    tr = await scan_tracks(config.music_path)
+    with open(f"{config.motiff_music_path}/Playlists/Unsorted/Unsorted.m3u", "w", encoding="utf-8") as file:
+        for i in tr:
+            file.write(f"{i}\n")
+    return True
+
 
 async def update_database():
-	await update_unsorted_playlist()
-	pass
+    await update_unsorted_playlist()
+
+    playlists_dir = Path(config.motiff_music_path) / "Playlists"
+    playlists_data = {}
+
+    if playlists_dir.exists():
+        for entry in os.scandir(playlists_dir):
+            if entry.is_dir():
+                p_dir = Path(entry.path)
+                p_name = entry.name
+                m3u_files = list(p_dir.glob("*.m3u")) + list(p_dir.glob("*.m3u8"))
+
+                if m3u_files:
+                    target_m3u = m3u_files[0]
+                else:
+                    target_m3u = p_dir / f"{p_name}.m3u"
+                    tracks_in_dir = []
+                    for root, _, files in os.walk(p_dir):
+                        for file in files:
+                            if Path(file).suffix.lower() in config.music_formats:
+                                tracks_in_dir.append(os.path.join(root, file))
+                    with open(target_m3u, "w", encoding="utf-8") as f:
+                        for tr in tracks_in_dir:
+                            f.write(f"{tr}\n")
+
+                parsed = await parse_m3u(str(target_m3u))
+                playlists_data[p_name] = {
+                    "file_path": str(target_m3u),
+                    "tracks": parsed
+                }
+
+    all_tracks = await scan_tracks(config.music_path)
+
+    db_content = {
+        "updated_at": time.time(),
+        "total_tracks": len(all_tracks),
+        "tracks": all_tracks,
+        "playlists": playlists_data
+    }
+
+    with open("database.json", "w", encoding="utf-8") as f:
+        json.dump(db_content, f, ensure_ascii=False, indent=4)
+
+    return True
+
 
 async def startup():
-	username = pwd.getpwuid(os.getuid()).pw_name
-	save_config("music_path",f"/home/{username}/Music")
-	with open("database.json", "w+") as f:
-		f.write("")
-		f.close()
-	save_config("motiff_music_path",f"/home/{username}/Music/Motiff")
-	os.makedirs(config.motiff_music_path, exist_ok=True)
-	os.makedirs(f"{config.motiff_music_path}/Playlists", exist_ok=True)
-	os.makedirs(f"{config.motiff_music_path}/Playlists/Favourites", exist_ok=True)
-	with open(f"{config.motiff_music_path}/Playlists/Favourites/Favourites.m3u", "w+") as f:
-		f.write("")
-		f.close()
-	os.makedirs(f"{config.motiff_music_path}/Playlists/Unsorted", exist_ok=True)
-	with open(f"{config.motiff_music_path}/Playlists/Unsorted/Unsorted.m3u", "w+") as f:
-		f.write("")
-		f.close()
-	await update_unsorted_playlist()
-	
-	return True
+    username = pwd.getpwuid(os.getuid()).pw_name
+    save_config("music_path", f"/home/{username}/Music")
+    with open("database.json", "w+") as f:
+        f.write("")
+    save_config("motiff_music_path", f"/home/{username}/Music/Motiff")
+    os.makedirs(config.motiff_music_path, exist_ok=True)
+    os.makedirs(f"{config.motiff_music_path}/Playlists", exist_ok=True)
+    os.makedirs(f"{config.motiff_music_path}/Playlists/Favourites", exist_ok=True)
+    with open(f"{config.motiff_music_path}/Playlists/Favourites/Favourites.m3u", "w+") as f:
+        f.write("")
+    os.makedirs(f"{config.motiff_music_path}/Playlists/Unsorted", exist_ok=True)
+    with open(f"{config.motiff_music_path}/Playlists/Unsorted/Unsorted.m3u", "w+") as f:
+        f.write("")
+    await update_database()
+    return True
