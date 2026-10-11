@@ -31,33 +31,34 @@ class UI:
 
     async def main(self, page: ft.Page):
         page.title = "Motiff"
+
+
+
+        
+
         right_panel_contents = ft.Column(
             expand=True,
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
                     ft.Container(
-                    	expand=True,
-                        margin=10,
-                        padding=10,
-                        bgcolor=ft.Colors.AMBER,
-                        border_radius=10,
-                        content=ft.Text("Non clickable"),
+                        alignment=ft.Alignment.TOP_CENTER,
+                        content=ft.Text("Now Playing:", size=20, weight=ft.FontWeight.W_600),
                     ),
                     ft.Container(
-                    	expand=True,
-                        margin=10,
-                        padding=10,
+                    	#here pictue, title, artist
                         bgcolor=ft.Colors.AMBER,
                         border_radius=10,
-                        content=ft.Text("Non clickable"),
+                        content=ft.Text("WIP"),
                     ),
                     ft.Container(
-                    	expand=True,
-                        margin=10,
+                    	#here time (on left now playing time, on right full time of the track), slider(dynamic that changes with the time, play pause, skip, undo, mix, repeat)
+
+                        margin=5,
                         padding=10,
                         bgcolor=ft.Colors.AMBER,
                         border_radius=10,
-                        content=ft.Text("Non clickable"),
+                        content=ft.Text("WIP"),
                     ),
             ],
          )
@@ -68,18 +69,13 @@ class UI:
             controls=[
                     ft.Container(
                     	expand=True,
-                        margin=10,
-                        padding=10,
+
                         bgcolor=ft.Colors.AMBER,
-                        border_radius=10,
-                        content=ft.Text("Non clickable"),
+                        border_radius=5,
+                        content=ft.Text("WIP"),
                     ),
                     ft.Container(
                     	expand=True,
-                        margin=10,
-                        padding=10,
-                        bgcolor=ft.Colors.BLUE,
-                        border_radius=10,
                         content=right_panel_contents,
                     ),
             ],
