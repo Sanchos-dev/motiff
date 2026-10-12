@@ -5,10 +5,13 @@ import os
 import pwd
 import json
 from pathlib import Path
-try:
-    import mutagen
-except:
-    mutagen = None
+import base64
+from io import BytesIO
+from pathlib import Path
+import mutagen
+from mutagen.flac import Picture
+from PIL import Image
+
 
 
 def save_config(inst, val):
@@ -74,6 +77,47 @@ async def parse_track_metadata(track_path):
         "duration": duration
     }
 
+async def parse_cover(track_path, output_dir=None):
+    path_obj = Path(track_path)
+    if output_dir:
+        output_path = Path(output_dir) / f"{path_obj.stem}.png"
+    else:
+        output_path = path_obj.with_suffix(".png")
+
+    image_data = None
+
+    try:
+        audio = mutagen.File(track_path)
+        if audio is None:
+            return None
+
+        if hasattr(audio, "pictures") and audio.pictures:
+            image_data = audio.pictures[0].data
+
+        elif audio.tags:
+            if "covr" in audio.tags and audio.tags["covr"]:
+                image_data = bytes(audio.tags["covr"][0])
+            elif "metadata_block_picture" in audio.tags:
+                b64 = audio.tags["metadata_block_picture"][0]
+                pic = Picture(base64.b64decode(b64))
+                image_data = pic.data
+            else:
+                for tag in audio.tags.values():
+                    if getattr(tag, "FrameID", None) == "APIC" or tag.__class__.__name__ == "APIC":
+                        image_data = tag.data
+                        break
+
+        if image_data:
+            if Image:
+                img = Image.open(BytesIO(image_data))
+                img.save(output_path, format="PNG")
+            else:
+                with open(output_path, "wb") as f:
+                    f.write(image_data)
+            return str(output_path)
+    except Exception:
+        pass
+    return None
 
 async def parse_m3u(file_path):
     tracklist = []
@@ -130,6 +174,7 @@ async def update_unsorted_playlist():
     tr = await scan_tracks(config.music_path)
     with open(f"{config.motiff_music_path}/Playlists/Unsorted/Unsorted.m3u", "w", encoding="utf-8") as file:
         for i in tr:
+            await parse_cover(i, output_dir=f"{config.motiff_music_path}/chache/")
             file.write(f"{i}\n")
     return True
 
@@ -195,5 +240,8 @@ async def startup():
     os.makedirs(f"{config.motiff_music_path}/Playlists/Unsorted", exist_ok=True)
     with open(f"{config.motiff_music_path}/Playlists/Unsorted/Unsorted.m3u", "w+") as f:
         f.write("")
+    os.makedirs(f"{config.motiff_music_path}/chache", exist_ok=True)
     await update_database()
+    
+
     return True
