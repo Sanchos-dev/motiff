@@ -58,9 +58,15 @@ class UI:
                 spacing=4,
                 controls=[
                     track_lil_cover,
-               	    ft.Text("Track_name", size=12, weight=ft.FontWeight.W_500),
-                    time_row,
-                    controls_row,
+                    ft.Column(
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=6,
+                        controls=[
+                            ft.Text("Track name", size=10, weight=ft.FontWeight.W_500),
+                            ft.Text("Artist", size=8, weight=ft.FontWeight.W_500),
+                        ],
+                        ),
+                    ft.Text("3:45", size=10, weight=ft.FontWeight.W_500),
                     ],
                 ),
             ),
