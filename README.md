@@ -18,5 +18,5 @@ Motiff supports:
 - [x] .aiff
 
 
-
+in the future Motiff will support internet radio, with already built-in library
 
