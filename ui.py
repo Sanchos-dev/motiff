@@ -37,6 +37,36 @@ class UI:
         page.title = "Motiff"
 
 
+
+
+
+
+        track_lil_cover = ft.Image(
+            src="https://picsum.photos/200/200",
+            width=50,
+            height=50,
+            fit=ft.BoxFit.COVER,
+            border_radius=5,
+        )
+
+        track_block = ft.Container(
+            margin=10,
+            padding=12,
+
+            border_radius=15,
+            content=ft.Row(
+                spacing=4,
+                controls=[
+                    track_lil_cover,
+               	    ft.Text("Track_name", size=12, weight=ft.FontWeight.W_500),
+                    time_row,
+                    controls_row,
+                    ],
+                ),
+            ),
+
+
+
         track_cover = ft.Image(
             src="https://picsum.photos/200/200",
             width=200,
