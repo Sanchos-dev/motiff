@@ -170,10 +170,6 @@ async def parse_m3u(file_path):
     return tracklist
 
 
-async def rename_tracks_from_meta(path):
-	pass
-
-
 async def update_unsorted_playlist():
     tr = await scan_tracks(config.music_path)
     with open(f"{config.motiff_music_path}/Playlists/Unsorted/Unsorted.m3u", "w", encoding="utf-8") as file:
@@ -181,6 +177,11 @@ async def update_unsorted_playlist():
             await parse_cover(i, output_dir=f"{config.motiff_music_path}/chache/")
             file.write(f"{i}\n")
     return True
+
+
+async def fast_update():
+    pass
+
 
 
 async def update_database():
