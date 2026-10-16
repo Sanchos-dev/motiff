@@ -184,6 +184,18 @@ async def fast_update():
 
 
 
+async def get_tracklist(playlist_name):
+    with open("database.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    playlists = data.get("playlists", {})
+    playlist = playlists.get(playlist_name)
+    if not playlist:
+        return []
+    track_titles = [track["title"] for track in playlist.get("tracks", [])]
+    return track_titles
+
+
+
 async def update_database():
     await update_unsorted_playlist()
 

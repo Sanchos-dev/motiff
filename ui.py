@@ -37,10 +37,6 @@ class UI:
         page.title = "Motiff"
 
 
-
-
-
-
         track_lil_cover = ft.Image(
             src="https://picsum.photos/200/200",
             width=50,
@@ -166,6 +162,16 @@ class UI:
             ],
         )
 
+        playlist_col = ft.Container(
+                    height=50,
+                    margin=10,
+                    alignment=ft.alignment.center,
+                    bgcolor=ft.Colors.BLUE,
+                    border_radius=10,
+                    content=ft.Text("PLAYLIST1"),
+                )
+
+
         layout = ft.Row(
             expand=True,
             vertical_alignment=ft.CrossAxisAlignment.STRETCH,
@@ -175,7 +181,7 @@ class UI:
                     margin=10,
                     bgcolor=ft.Colors.AMBER,
                     border_radius=10,
-                    content=ft.Text("WIP"),
+                    content=playlist_col,
                 ),
                 ft.Container(
                     expand=True,
@@ -183,6 +189,9 @@ class UI:
                 ),
             ],
         )
+
+
+
 
         page.add(layout)
         page.update()
