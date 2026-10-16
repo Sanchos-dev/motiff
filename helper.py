@@ -191,10 +191,12 @@ async def get_tracklist(playlist_name):
     playlist = playlists.get(playlist_name)
     if not playlist:
         return []
-    track_titles = [track["title"] for track in playlist.get("tracks", [])]
-    return track_titles
+    return playlist.get("tracks", [])
 
-
+async def get_playlists():
+    with open("database.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return list(data.get("playlists", {}).keys())
 
 async def update_database():
     await update_unsorted_playlist()
