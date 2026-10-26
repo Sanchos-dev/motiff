@@ -162,7 +162,7 @@ class UI:
                 cover_file = os.path.splitext(filename)[0] + ".png"
                 cover_path = os.path.join(config.motiff_music_path, "chache", cover_file)
                 if not os.path.exists(cover_path):
-                    cover_path = "https://picsum.photos/200/200"
+                    cover_path = "src/unknown_track.jpg"
 
                 track_card = ft.Container(
                     padding=8,
