@@ -1,3 +1,5 @@
+### full ui mode
+
 import os
 import asyncio
 import flet as ft

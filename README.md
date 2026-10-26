@@ -1,5 +1,12 @@
 # WIP Motiff
 
+With motiff I'm trying to create a comfortable music player that meets my standarts:
+
+- simple not bloated ui
+- full theme customization
+- playlists support
+- 2 modes (first: full_mode - like Spotify, but local. second: simple_mode - when you open audio-file to listen to it only.)
+
 Motiff is an open-source music player for linux with simple ui. 
 What do you want? it's just a player
 
