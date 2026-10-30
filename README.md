@@ -12,6 +12,8 @@ With motiff I'm trying to create a comfortable music player that meets my standa
 - EQ
 - 2 modes (first: full_mode - like Spotify, but local. second: simple_mode - when you open audio-file to listen to it only.)
 
+
+
 Motiff supports:
 - [x] local m3u/m3u8 playlists
 - [ ] m3u/m3u8 playlists (http music streaming like internet radio)
@@ -28,4 +30,4 @@ Motiff supports:
 
 
 in the future Motiff will support internet radio, with already built-in library
-
+also in the future u will can turn on online settings to parse lyrics and album covers
